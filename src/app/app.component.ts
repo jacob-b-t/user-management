@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { Firestore } from '@angular/fire/firestore';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 
