@@ -1,0 +1,28 @@
+<div class="add-user-form" [formGroup]="userForm">
+  <h4>Add User</h4>
+  <mat-form-field>
+    <mat-label>User name</mat-label>
+    <input
+      matInput
+      [formControl]="userForm.controls.username"
+      placeholder="Example: Jacob_123"
+    />
+    @if (userForm.controls.username.hasError('required')) {
+    <mat-error>Username is required</mat-error>
+    } @else if (userForm.controls.username.hasError('userNameTaken')) {
+      <mat-error>Username is taken, please choose another</mat-error>
+    }
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Role</mat-label>
+    <mat-select [formControl]="userForm.controls.role">
+      @for (role of roleOptions; track $index) {
+      <mat-option [value]="role.value">{{ role.viewValue }}</mat-option>
+      }
+    </mat-select>
+    @if (userForm.controls.role.hasError('required')) {
+    <mat-error>Role is required</mat-error>
+    }
+  </mat-form-field>
+  <button mat-raised-button disabled="{{userForm.invalid}}" (click)="addUser()">Add user</button>
+</div>

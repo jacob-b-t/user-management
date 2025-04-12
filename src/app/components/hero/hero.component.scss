@@ -1,0 +1,15 @@
+@use 'mixins' as mixins;
+@use 'variables' as variables;
+
+.hero {
+  height: 20vh;
+  background-color: variables.$ui-grey;
+  display: flex;
+  &__header {
+    width: 90vw;
+    margin: auto;
+    @include mixins.screen-sm {
+      width: 80vw;
+    }
+  }
+}

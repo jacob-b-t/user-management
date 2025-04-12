@@ -1,0 +1,9 @@
+<h2 mat-dialog-title>{{ data.username }}</h2>
+<mat-dialog-content>
+  @if (data.editMode) {
+    <p>In Edit? {{ data.editMode }}</p>
+    <app-user-form [content]="data"></app-user-form>
+  } @else {
+    <p>not editing</p>
+  }
+</mat-dialog-content>
