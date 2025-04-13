@@ -23,10 +23,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { UserFormContent } from '../../models';
-import type { RoleOption } from '../../models/roleOption.interface';
-import type { UserFormOutput } from '../../models/user.interface';
-import type { UserForm } from '../../models/userForm.interface';
+import type { UserFormContent, RoleOption, UserFormOutput, UserForm } from '../../models';
 import { roleOptions } from '../../ui_objects/roleOptions';
 
 @Component({

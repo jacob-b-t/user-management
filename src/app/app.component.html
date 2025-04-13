@@ -1,7 +1,10 @@
 <app-hero [header]="heroHeader"></app-hero>
 <div class="user-management-container">
   @if(users$ | async; as users) {
-    <app-user-form (userUpdated)="userAddedClicked($event)" [content]="{userNames: userService.userNames()}"></app-user-form>
+    <div class="user-management-container__add-or-search">
+      <app-user-form (userUpdated)="userAddedClicked($event)" [content]="{userNames: userService.userNames()}"></app-user-form>
+      <app-user-search (userEmit)="openEdit($event, false)"></app-user-search>
+    </div>
     <app-user-table (edit)="openEdit($event, true)" [users]="users"></app-user-table>
   } @else {
     <mat-spinner></mat-spinner>

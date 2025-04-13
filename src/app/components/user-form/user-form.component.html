@@ -1,4 +1,4 @@
-<div class="add-user-form" [formGroup]="userForm">
+<form class="add-user-form" [formGroup]="userForm">
   <h4>{{content.editMode ? 'Edit' : 'Add'}} User</h4>
   <mat-form-field>
     <mat-label>User name</mat-label>
@@ -31,4 +31,4 @@
     </mat-radio-group>
   }
   <button mat-raised-button disabled="{{userForm.invalid}}" (click)="updateUser()">{{buttonText}}</button>
-</div>
+</form>

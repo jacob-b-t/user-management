@@ -9,10 +9,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { UserNotifyService } from '../../services';
 import { RoleFormatterPipe } from '../../pipes/role-formatter.pipe';
-import type { UserModalContent } from '../../models/userModalContent.interface';
 import { UserFormComponent } from '../user-form/user-form.component';
 import { UserService } from '../../services/user.service';
-import { User } from '../../models';
+import type { User, UserFormOutput, UserModalContent } from '../../models';
 
 @Component({
   selector: 'app-user-details-modal',
@@ -34,7 +33,7 @@ export class UserDetailsModalComponent {
   private _userNotifyService: UserNotifyService = inject(UserNotifyService);
   constructor(@Inject(MAT_DIALOG_DATA) public data: UserModalContent) {}
 
-  public updateUser(event: any): void {
+  public updateUser(event: UserFormOutput): void {
     const update: User = {
       ...this.data.user,
       ...event,
@@ -43,10 +42,16 @@ export class UserDetailsModalComponent {
       next: () => {
         this.data.user = update;
         this.data.editMode = false;
-        this._userNotifyService.openNotification(`User: ${this.data.user.username} has been updated in the database`, 'OK')
+        this._userNotifyService.openNotification(
+          `User: ${this.data.user.username} has been updated in the database`,
+          'OK'
+        );
       },
       error: () => {
-        this._userNotifyService.openNotification('An error updating a user has occurred, please try again', 'OK')
+        this._userNotifyService.openNotification(
+          'An error updating a user has occurred, please try again',
+          'OK'
+        );
       },
     });
   }

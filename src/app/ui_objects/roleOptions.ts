@@ -1,4 +1,4 @@
-import { RoleOption } from '../models/roleOption.interface';
+import type { RoleOption } from '../models/roleOption.interface';
 
 export const roleOptions: RoleOption[] = [
   {

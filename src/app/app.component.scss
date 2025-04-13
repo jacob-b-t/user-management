@@ -9,4 +9,22 @@
   @include mixins.screen-sm {
     width: 80vw;
   }
+
+  &__add-or-search {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 5rem;
+    @include mixins.screen-sm {
+      flex-direction: row;
+    }
+
+    & :first-child {
+      flex: 2
+    }
+
+    & :last-child {
+      flex: 1
+    }
+  }
 }
