@@ -4,13 +4,14 @@ import {
   DocumentReference,
   Firestore,
   addDoc,
+  updateDoc,
   collection,
   collectionData,
   doc,
   docData,
-  Timestamp
+  Timestamp,
 } from '@angular/fire/firestore';
-import { first, from, map, Observable, switchMap, tap } from 'rxjs';
+import { first, from, map, Observable, of, switchMap, tap } from 'rxjs';
 import { User, UserFormOutput } from '../models/user.interface';
 
 @Injectable({
@@ -24,7 +25,7 @@ export class UserService {
 
   public getUsers(): Observable<User[]> {
     return collectionData(this._userCollection, { idField: 'id' }).pipe(
-      // Set the userNames to be used username duplication control
+      // Set the userNames to be used in username duplication control
       tap((response: (DocumentData | (DocumentData & User))[]) =>
         this.userNames.set(response.map((value) => value.username))
       ),
@@ -51,14 +52,21 @@ export class UserService {
   public addUser(newUser: UserFormOutput): Observable<any> {
     const fullUser: User = {
       ...newUser,
-      enabled: true,
-      createdAt: Timestamp.fromDate(new Date())
-    }
+      createdAt: Timestamp.fromDate(new Date()),
+    };
     return from(addDoc(this._userCollection, fullUser)).pipe(
       first(),
       switchMap((documentReference: DocumentReference) => {
         return this.getUserById(documentReference.id);
       })
     );
+  }
+
+  public updateUser(user: User): Observable<any> {
+    if (!user?.id) {
+      return of('User id is required');
+    }
+    const ref = doc(this._firestore, 'users', user.id);
+    return from(updateDoc(ref, { ...user })).pipe(first());
   }
 }

@@ -7,7 +7,6 @@ export interface UserFormOutput {
 }
 
 export interface User extends UserFormOutput {
-  enabled: boolean;
   id?: string;
   createdAt?: Timestamp;
 }

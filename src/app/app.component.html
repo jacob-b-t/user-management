@@ -1,7 +1,7 @@
 <app-hero [header]="heroHeader"></app-hero>
 <div class="user-management-container">
   @if(users$ | async; as users) {
-    <app-user-form (userAdded)="userAddedClicked($event)" [content]="{userNames: userService.userNames()}"></app-user-form>
+    <app-user-form (userUpdated)="userAddedClicked($event)" [content]="{userNames: userService.userNames()}"></app-user-form>
     <app-user-table (edit)="openEdit($event, true)" [users]="users"></app-user-table>
   } @else {
     <mat-spinner></mat-spinner>

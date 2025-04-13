@@ -1,5 +1,5 @@
 <div class="add-user-form" [formGroup]="userForm">
-  <h4>Add User</h4>
+  <h4>{{content.editMode ? 'Edit' : 'Add'}} User</h4>
   <mat-form-field>
     <mat-label>User name</mat-label>
     <input
@@ -24,5 +24,11 @@
     <mat-error>Role is required</mat-error>
     }
   </mat-form-field>
-  <button mat-raised-button disabled="{{userForm.invalid}}" (click)="addUser()">Add user</button>
+  @if(content.editMode) {
+    <mat-radio-group [formControl]="userForm.controls.enabled" aria-label="Enable or disable a user">
+      <mat-radio-button value="true">Enabled</mat-radio-button>
+      <mat-radio-button value="false">Disabled</mat-radio-button>
+    </mat-radio-group>
+  }
+  <button mat-raised-button disabled="{{userForm.invalid}}" (click)="updateUser()">{{buttonText}}</button>
 </div>

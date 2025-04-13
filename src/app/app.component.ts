@@ -2,6 +2,7 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
 import {
   HeroComponent,
@@ -10,7 +11,7 @@ import {
   UserTableComponent,
 } from './components';
 import type { User, UserFormOutput } from './models/user.interface';
-import { UserService } from './services/user.service';
+import { UserService, UserNotifyService } from './services';
 
 @Component({
   selector: 'app-root',
@@ -28,6 +29,7 @@ import { UserService } from './services/user.service';
 })
 export class AppComponent {
   private _dialogue: MatDialog = inject(MatDialog);
+  private _userNotifyService: UserNotifyService = inject(UserNotifyService)
   public userService = inject(UserService);
 
   public title = 'user-management-fe';
@@ -37,10 +39,10 @@ export class AppComponent {
   public userAddedClicked(event: UserFormOutput): void {
     this.userService.addUser(event).subscribe({
       next: (res) => {
-        console.log('in app', res);
+        this._userNotifyService.openNotification(`New ${res.role}: ${res.username} has been added to the database`, 'OK')
       },
-      error: (err) => {
-        console.error(err);
+      error: () => {
+        this._userNotifyService.openNotification('An error adding a user has occurred, please try again', 'OK')
       },
     });
   }
@@ -48,8 +50,9 @@ export class AppComponent {
   public openEdit(event: User, inEdit: boolean): void {
     this._dialogue.open(UserDetailsModalComponent, {
       data: {
-        ...event,
-        ...{ editMode: inEdit, userNames: this.userService.userNames() },
+        user: event,
+        editMode: true,
+        userNames: this.userService.userNames(),
       },
       height: '75%',
       width: '75%',

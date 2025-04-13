@@ -1,9 +1,24 @@
-<h2 mat-dialog-title>{{ data.username }}</h2>
+<h2 mat-dialog-title>User Details</h2>
 <mat-dialog-content>
   @if (data.editMode) {
-    <p>In Edit? {{ data.editMode }}</p>
-    <app-user-form [content]="data"></app-user-form>
+    <app-user-form [content]="data" (userUpdated)="updateUser($event)"></app-user-form>
   } @else {
-    <p>not editing</p>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Username: {{data.user.username}}</mat-card-title>
+        <mat-card-title>Role: {{data.user.role | roleFormatter}}</mat-card-title>
+        <mat-card-title>Enabled: {{data.user.enabled}}</mat-card-title>
+      </mat-card-header>
+      <mat-card-actions align="end">
+        <button mat-stroked-button (click)="editUser(true)">
+          <mat-icon
+            aria-hidden="false"
+            aria-label="edit"
+            fontIcon="edit"
+          ></mat-icon>
+          Edit user
+        </button>
+      </mat-card-actions>
+    </mat-card>
   }
 </mat-dialog-content>

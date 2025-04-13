@@ -6,8 +6,11 @@ import { roleOptions } from '../ui_objects/roleOptions';
   standalone: true,
 })
 export class RoleFormatterPipe implements PipeTransform {
-  transform(value: string): string | undefined {
+  transform(value: string | null): string | undefined {
     const found = roleOptions.find((option) => option.value === value)
+    if (!found || !value) {
+      return 'Role not defined'
+    }
     return found?.viewValue
   }
 }
