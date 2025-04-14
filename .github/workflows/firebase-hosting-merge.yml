@@ -11,9 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: browser-actions/setup-chrome@v1
+      - run: chrome --version
       - run: npm i
-      - run: npx ng test
-      - run: npm run buildForDeploy
+      - run: npm run test-headerless
+      - run: npm run build-for-deploy
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

@@ -5,9 +5,10 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "buildForDeploy": "mkdir public && npx ng build && cp -R dist/user-management-fe/browser/. public/",
+    "build-for-deploy": "mkdir public && npx ng build && cp -R dist/user-management-fe/browser/. public/",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test-headerless": "npx ng test --watch=false --browsers=ChromeHeadless"
   },
   "private": true,
   "dependencies": {
