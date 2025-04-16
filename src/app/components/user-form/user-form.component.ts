@@ -23,7 +23,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import type { UserFormContent, RoleOption, UserFormOutput, UserForm } from '../../models';
+import type { UserFormContent, RoleOption, UserFormOutput, UserForm, User } from '../../models';
 import { roleOptions } from '../../ui_objects/roleOptions';
 
 @Component({
@@ -45,6 +45,9 @@ import { roleOptions } from '../../ui_objects/roleOptions';
 export class UserFormComponent implements OnInit {
   @Input() content: UserFormContent;
   @Output() userUpdated: EventEmitter<UserFormOutput> = new EventEmitter();
+  @Output() userDeleted: EventEmitter<string> = new EventEmitter();
+  @Output() editCanceled: EventEmitter<boolean> = new EventEmitter();
+
   private _fb: FormBuilder = inject(FormBuilder);
 
   public roleOptions: RoleOption[] = roleOptions;
@@ -80,6 +83,17 @@ export class UserFormComponent implements OnInit {
     if (!this.content.editMode) {
       this.userForm.reset();
     }
+  }
+
+  public cancelEdit(): void {
+    this.editCanceled.emit(false)
+  }
+
+  public deleteUser(): void {
+    if (!this.content.user) {
+      return
+    }
+    this.userDeleted.emit(this.content.user.id)
   }
 
   private _checkUserNameUniqueValidator(): ValidatorFn {

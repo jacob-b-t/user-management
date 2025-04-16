@@ -1,7 +1,7 @@
 <h2 mat-dialog-title>User Details</h2>
 <mat-dialog-content>
   @if (data.editMode) {
-    <app-user-form [content]="data" (userUpdated)="updateUser($event)"></app-user-form>
+    <app-user-form [content]="data" (userUpdated)="updateUser($event)" (editCanceled)="editUser(false)" (userDeleted)="deleteUser($event)"></app-user-form>
   } @else {
     <mat-card>
       <mat-card-header>
@@ -10,7 +10,7 @@
         <mat-card-title>Enabled: {{data.user.enabled}}</mat-card-title>
       </mat-card-header>
       <mat-card-actions align="end">
-        <button mat-stroked-button (click)="editUser(true)">
+        <button type="button" mat-stroked-button (click)="editUser(true)">
           <mat-icon
             aria-hidden="false"
             aria-label="edit"

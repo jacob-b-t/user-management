@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UserDetailsModalComponent } from './user-details-modal.component';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { RoleFormatterPipe } from '../../pipes/role-formatter.pipe';
 import { UserService } from '../../services/user.service';
 import { UserNotifyService } from '../../services';
@@ -12,6 +12,7 @@ describe('UserDetailsModalComponent', () => {
   let fixture: ComponentFixture<UserDetailsModalComponent>;
   let userServiceSpy: jasmine.SpyObj<UserService>;
   let notifyServiceSpy: jasmine.SpyObj<UserNotifyService>;
+  let dialogSpy: jasmine.SpyObj<MatDialogRef<UserDetailsModalComponent>>;
   let userData: User;
   let content: UserModalContent;
 
@@ -28,8 +29,14 @@ describe('UserDetailsModalComponent', () => {
       user: userData,
     };
 
-    userServiceSpy = jasmine.createSpyObj('UserService', ['updateUser']);
-    notifyServiceSpy = jasmine.createSpyObj('UserNotifyService', ['openNotification']);
+    userServiceSpy = jasmine.createSpyObj('UserService', [
+      'updateUser',
+      'deleteUser',
+    ]);
+    notifyServiceSpy = jasmine.createSpyObj('UserNotifyService', [
+      'openNotification',
+    ]);
+    dialogSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
       imports: [UserDetailsModalComponent],
@@ -38,6 +45,7 @@ describe('UserDetailsModalComponent', () => {
         { provide: MAT_DIALOG_DATA, useValue: content },
         { provide: UserService, useValue: userServiceSpy },
         { provide: UserNotifyService, useValue: notifyServiceSpy },
+        { provide: MatDialogRef, useValue: dialogSpy },
       ],
     }).compileComponents();
 
@@ -77,7 +85,9 @@ describe('UserDetailsModalComponent', () => {
       enabled: true,
       role: 'user',
     };
-    userServiceSpy.updateUser.and.returnValue(throwError(() => new Error('Update failed')));
+    userServiceSpy.updateUser.and.returnValue(
+      throwError(() => new Error('Update failed'))
+    );
 
     component.updateUser(formOutput);
 
@@ -86,6 +96,33 @@ describe('UserDetailsModalComponent', () => {
       'An error updating a user has occurred, please try again',
       'OK'
     );
+  });
+
+  it('should call deleteUser and handle success', () => {
+    const deleteMessage = 'user has been deleted';
+    userServiceSpy.deleteUser.and.returnValue(of(deleteMessage));
+
+    component.deleteUser('user123');
+    expect(userServiceSpy.deleteUser).toHaveBeenCalledWith('user123');
+    expect(notifyServiceSpy.openNotification).toHaveBeenCalledWith(
+      deleteMessage,
+      'OK'
+    );
+    expect(dialogSpy.close).toHaveBeenCalled();
+  });
+
+  it('should call deleteUser and handle success', () => {
+    userServiceSpy.deleteUser.and.returnValue(
+      throwError(() => new Error('Delete failed'))
+    );
+
+    component.deleteUser('user123');
+    expect(userServiceSpy.deleteUser).toHaveBeenCalledWith('user123');
+    expect(notifyServiceSpy.openNotification).toHaveBeenCalledWith(
+      'An error deleting the user has occurred, please try again',
+      'OK'
+    );
+    expect(dialogSpy.close).not.toHaveBeenCalled();
   });
 
   it('should toggle editMode', () => {

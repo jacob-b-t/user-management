@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { UserFormComponent } from './user-form.component';
-import { UserFormContent } from '../../models';
+import { User, UserFormContent } from '../../models';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 describe('UserFormComponent', () => {
@@ -108,4 +108,35 @@ describe('UserFormComponent', () => {
     });
     expect(component.userForm.value.username).toBe('newuser');
   });
+
+  it('should emit editCanceled when cancelEdit is called', () =>{
+    spyOn(component.editCanceled, 'emit');
+    component.cancelEdit();
+
+    expect(component.editCanceled.emit).toHaveBeenCalledOnceWith(false)
+  })
+
+  it('should do nothing if deleteUser is called with no user data', () => {
+    spyOn(component.userDeleted, 'emit');
+    component.content.user = undefined;
+    fixture.detectChanges();
+    component.deleteUser();
+
+    expect(component.userDeleted.emit).not.toHaveBeenCalled();
+  })
+
+  it('should emit a user.id if deleteUser is called and user data is present', () => {
+    const mockUser: User = {
+      username: 'user123',
+      role: 'admin',
+      id: '12345',
+      enabled: true
+    }
+    spyOn(component.userDeleted, 'emit');
+    component.content.user = mockUser;
+    fixture.detectChanges();
+    component.deleteUser();
+
+    expect(component.userDeleted.emit).toHaveBeenCalledWith(mockUser.id);
+  })
 });

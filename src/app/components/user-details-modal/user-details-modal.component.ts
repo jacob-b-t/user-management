@@ -2,6 +2,7 @@ import { Component, inject, Inject } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogContent,
+  MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
@@ -29,6 +30,7 @@ import type { User, UserFormOutput, UserModalContent } from '../../models';
   styleUrl: './user-details-modal.component.scss',
 })
 export class UserDetailsModalComponent {
+  readonly dialogRef = inject(MatDialogRef<UserDetailsModalComponent>);
   private _userService: UserService = inject(UserService);
   private _userNotifyService: UserNotifyService = inject(UserNotifyService);
   constructor(@Inject(MAT_DIALOG_DATA) public data: UserModalContent) {}
@@ -56,7 +58,22 @@ export class UserDetailsModalComponent {
     });
   }
 
-  public editUser(val: boolean) {
+  public deleteUser(event: string): void {
+    this._userService.deleteUser(event).subscribe({
+      next: (res: string) => {
+        this._userNotifyService.openNotification(res, 'OK');
+        this.dialogRef.close();
+      },
+      error: () => {
+        this._userNotifyService.openNotification(
+          'An error deleting the user has occurred, please try again',
+          'OK'
+        );
+      },
+    });
+  }
+
+  public editUser(val: boolean): void {
     this.data.editMode = val;
   }
 }

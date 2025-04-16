@@ -1,5 +1,27 @@
+@use 'mixins' as mixins;
+
 .add-user-form {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+
+  &__button-container {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column-reverse;
+    gap: 3rem;
+    @include mixins.screen-sm {
+      flex-direction: row;
+      gap: 0;
+    }
+
+    &--safe-actions {
+      display: flex;
+      gap: 1rem;
+      flex-direction: column-reverse;
+      @include mixins.screen-sm {
+        flex-direction: row;
+      }
+    }
+  }
 }

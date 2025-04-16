@@ -1,5 +1,5 @@
 <form class="add-user-form" [formGroup]="userForm">
-  <h4>{{content.editMode ? 'Edit' : 'Add'}} User</h4>
+  <h4>{{ content.editMode ? "Edit" : "Add" }} User</h4>
   <mat-form-field>
     <mat-label>User name</mat-label>
     <input
@@ -10,7 +10,7 @@
     @if (userForm.controls.username.hasError('required')) {
     <mat-error>Username is required</mat-error>
     } @else if (userForm.controls.username.hasError('userNameTaken')) {
-      <mat-error>Username is taken, please choose another</mat-error>
+    <mat-error>Username is taken, please choose another</mat-error>
     }
   </mat-form-field>
   <mat-form-field>
@@ -25,10 +25,32 @@
     }
   </mat-form-field>
   @if(content.editMode) {
-    <mat-radio-group [formControl]="userForm.controls.enabled" aria-label="Enable or disable a user">
-      <mat-radio-button value="true">Enabled</mat-radio-button>
-      <mat-radio-button value="false">Disabled</mat-radio-button>
-    </mat-radio-group>
+  <mat-radio-group
+    [formControl]="userForm.controls.enabled"
+    aria-label="Enable or disable a user"
+  >
+    <mat-radio-button value="true">Enabled</mat-radio-button>
+    <mat-radio-button value="false">Disabled</mat-radio-button>
+  </mat-radio-group>
   }
-  <button mat-raised-button disabled="{{userForm.invalid}}" (click)="updateUser()">{{buttonText}}</button>
+  <div class="add-user-form__button-container">
+    @if(content.editMode) {
+    <button mat-flat-button color="warn" (click)="deleteUser()">
+      Delete user
+    </button>
+    }
+    <div class="add-user-form__button-container--safe-actions">
+      @if(content.editMode) {
+      <button mat-button (click)="cancelEdit()">Cancel editing</button>
+      }
+      <button
+        mat-flat-button
+        color="primary"
+        disabled="{{ userForm.invalid }}"
+        (click)="updateUser()"
+      >
+        {{ buttonText }}
+      </button>
+    </div>
+  </div>
 </form>

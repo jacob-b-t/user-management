@@ -1,14 +1,16 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
 import { UserService } from './user.service';
 import { Firestore } from '@angular/fire/firestore';
 import { FirestoreUtilService } from './firestore-util.service';
 import { of, Subscription } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 
 describe('UserService', () => {
   let service: UserService;
   let firestoreUtil: jasmine.SpyObj<FirestoreUtilService>;
   let subscriptions: Subscription[] = [];
-  let firestoreUtilSpy: jasmine.SpyObj<FirestoreUtilService>
+  let firestoreUtilSpy: jasmine.SpyObj<FirestoreUtilService>;
+  let httpSpy: jasmine.SpyObj<HttpClient>;
 
   const mockUser = {
     username: 'testuser',
@@ -18,6 +20,7 @@ describe('UserService', () => {
   };
 
   beforeEach(() => {
+    httpSpy = jasmine.createSpyObj('HttpClient', ['delete']);
     firestoreUtilSpy = jasmine.createSpyObj('FirestoreUtilService', [
       'collection',
       'collectionData',
@@ -31,10 +34,11 @@ describe('UserService', () => {
       'and',
       'Timestamp',
     ]);
-
     firestoreUtilSpy.collection.and.returnValue({} as any);
     firestoreUtilSpy.collectionData.and.returnValue(of([mockUser]));
-    firestoreUtilSpy.addDoc.and.returnValue(Promise.resolve({ id: 'mockId' } as any));
+    firestoreUtilSpy.addDoc.and.returnValue(
+      Promise.resolve({ id: 'mockId' } as any)
+    );
     firestoreUtilSpy.doc.and.returnValue({} as any);
     firestoreUtilSpy.docData.and.returnValue(of(mockUser));
     firestoreUtilSpy.updateDoc.and.returnValue(Promise.resolve());
@@ -47,6 +51,7 @@ describe('UserService', () => {
         UserService,
         { provide: Firestore, useValue: {} },
         { provide: FirestoreUtilService, useValue: firestoreUtilSpy },
+        { provide: HttpClient, useValue: httpSpy },
       ],
     });
 
@@ -93,7 +98,7 @@ describe('UserService', () => {
 
   it('should return null if no user is found', fakeAsync(() => {
     let user;
-    firestoreUtilSpy.docData.and.returnValue(of(undefined))
+    firestoreUtilSpy.docData.and.returnValue(of(undefined));
     subscriptions.push(
       service.getUserById('123').subscribe({
         next: (u) => {
@@ -168,4 +173,29 @@ describe('UserService', () => {
     expect(firestoreUtil.query).toHaveBeenCalled();
     expect(firestoreUtil.collectionData).toHaveBeenCalled();
   }));
+
+  it('should delete a user with an http call', fakeAsync(() => {
+    let result;
+    httpSpy.delete.and.returnValue(of('user deleted'));
+    subscriptions.push(
+      service.deleteUser('user123', true).subscribe({
+        next: (res) => {
+          result = res;
+          expect(res).toEqual('user deleted');
+        },
+      })
+    );
+  }));
+
+  it('should fake a response if withCloudFunction is false', fakeAsync(() => {
+    let result;
+    subscriptions.push(service.deleteUser('user123').subscribe({
+      next: (res) => {
+        result = res;
+        expect(res).toEqual('user has been deleted')
+      }
+    }))
+    // Match pipe delay from mocked request
+    tick(1000)
+  }))
 });

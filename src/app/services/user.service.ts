@@ -5,27 +5,56 @@ import {
   Firestore,
 } from '@angular/fire/firestore';
 import { FirestoreUtilService } from './firestore-util.service';
-import { first, from, map, Observable, of, switchMap, tap } from 'rxjs';
+import { delay, first, from, map, Observable, of, switchMap, tap } from 'rxjs';
 import type { User, UserFormOutput } from '../models/user.interface';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
   private _firestore: Firestore = inject(Firestore);
-  private _firestoreUtil: FirestoreUtilService = inject(FirestoreUtilService)
-  private _userCollection = this._firestoreUtil.collection(this._firestore, 'users');
+  private _firestoreUtil: FirestoreUtilService = inject(FirestoreUtilService);
+  private _httpClient: HttpClient = inject(HttpClient);
+  private _userCollection = this._firestoreUtil.collection(
+    this._firestore,
+    'users'
+  );
 
   public userNames = signal<string[]>([]);
 
   public getUsers(): Observable<User[]> {
-    return this._firestoreUtil.collectionData(this._userCollection, { idField: 'id' }).pipe(
-      // Set the userNames to be used in username duplication control
-      tap((response: (DocumentData | (DocumentData & User))[]) =>
-        this.userNames.set(response.map((value) => value.username))
-      ),
-      map((response: (DocumentData | (DocumentData & User))[]) =>
-        response.map((value) => {
+    return this._firestoreUtil
+      .collectionData(this._userCollection, { idField: 'id' })
+      .pipe(
+        // Set the userNames to be used in username duplication control
+        tap((response: (DocumentData | (DocumentData & User))[]) =>
+          this.userNames.set(response.map((value) => value.username))
+        ),
+        map((response: (DocumentData | (DocumentData & User))[]) =>
+          response.map((value) => {
+            return {
+              username: value.username,
+              enabled: value.enabled,
+              id: value.id,
+              role: value.role,
+            };
+          })
+        )
+      );
+  }
+
+  public getUserById(id: string): Observable<User | null> {
+    return this._firestoreUtil
+      .docData(this._firestoreUtil.doc(this._firestore, 'users', id), {
+        idField: 'id',
+      })
+      .pipe(
+        first(),
+        map((value: DocumentData | (DocumentData & User) | undefined) => {
+          if (!value) {
+            return null;
+          }
           return {
             username: value.username,
             enabled: value.enabled,
@@ -33,25 +62,7 @@ export class UserService {
             role: value.role,
           };
         })
-      )
-    );
-  }
-
-  public getUserById(id: string): Observable<User | null> {
-    return this._firestoreUtil.docData(this._firestoreUtil.doc(this._firestore, 'users', id), { idField: 'id' }).pipe(
-      first(),
-      map((value: DocumentData | (DocumentData & User) | undefined) => {
-        if (!value) {
-          return null;
-        }
-        return {
-          username: value.username,
-          enabled: value.enabled,
-          id: value.id,
-          role: value.role,
-        };
-      })
-    );
+      );
   }
 
   public addUser(newUser: UserFormOutput): Observable<User | null> {
@@ -59,7 +70,9 @@ export class UserService {
       ...newUser,
       createdAt: this._firestoreUtil.Timestamp.fromDate(new Date()),
     };
-    return from(this._firestoreUtil.addDoc(this._userCollection, fullUser)).pipe(
+    return from(
+      this._firestoreUtil.addDoc(this._userCollection, fullUser)
+    ).pipe(
       first(),
       switchMap((documentReference: DocumentReference) => {
         return this.getUserById(documentReference.id);
@@ -72,10 +85,12 @@ export class UserService {
       return of('User id is required');
     }
     // Stop the document id being added a field value needlessly
-    const noDuplicateId = structuredClone(user)
-    delete noDuplicateId.id
+    const noDuplicateId = structuredClone(user);
+    delete noDuplicateId.id;
     const ref = this._firestoreUtil.doc(this._firestore, 'users', user.id);
-    return from(this._firestoreUtil.updateDoc(ref, { ...noDuplicateId })).pipe(first());
+    return from(this._firestoreUtil.updateDoc(ref, { ...noDuplicateId })).pipe(
+      first()
+    );
   }
 
   /**
@@ -106,8 +121,16 @@ export class UserService {
         ),
         // lowercase:
         this._firestoreUtil.and(
-          this._firestoreUtil.where('username', '>=', queryString.toLowerCase()),
-          this._firestoreUtil.where('username', '<=', queryString.toLowerCase() + '\uf8ff')
+          this._firestoreUtil.where(
+            'username',
+            '>=',
+            queryString.toLowerCase()
+          ),
+          this._firestoreUtil.where(
+            'username',
+            '<=',
+            queryString.toLowerCase() + '\uf8ff'
+          )
         ),
         this._firestoreUtil.and(
           this._firestoreUtil.where('role', '>=', queryString),
@@ -131,7 +154,11 @@ export class UserService {
         // lowercase:
         this._firestoreUtil.and(
           this._firestoreUtil.where('role', '>=', queryString.toLowerCase()),
-          this._firestoreUtil.where('role', '<=', queryString.toLowerCase() + '\uf8ff')
+          this._firestoreUtil.where(
+            'role',
+            '<=',
+            queryString.toLowerCase() + '\uf8ff'
+          )
         )
       )
     );
@@ -147,5 +174,15 @@ export class UserService {
         })
       )
     );
+  }
+
+  public deleteUser(
+    userId: string,
+    withCloudFunction: boolean = false
+  ): Observable<string> {
+    if (withCloudFunction) {
+      return this._httpClient.delete<string>(`url-to-cloud-function/${userId}`);
+    }
+    return of('user has been deleted').pipe(delay(1000));
   }
 }
